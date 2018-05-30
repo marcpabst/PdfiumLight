@@ -1,5 +1,5 @@
 # PdfiumLight
-A lightweight C# Library to render PDFs with Google's Pdfium in .NET Apps. This is basicly a stripped down version of [Pieter van Ginkel's PdfiumViewer](https://github.com/pvginkel/PdfiumViewer) with added functionality. 
+A lightweight C# Library to render PDFs with Google's Pdfium in .NET Apps. This is basically a much slimmer version of [Pieter van Ginkel's PdfiumViewer](https://github.com/pvginkel/PdfiumViewer) with some added functionality. 
 
 ## Getting started
 Getting started is easy. Just add `PdfiumLight`, `PdfiumViewer.Native.x86.v8-xfa` and / or `PdfiumViewer.Native.x86_64.v8-xfa` (see below) as  NuGet dependencies to your project and you're good to go:
