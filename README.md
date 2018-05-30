@@ -2,19 +2,20 @@
 A lightweight C# Library to render PDFs with Google's Pdfium in .NET Apps. This is basicly a stripped down version of [Pieter van Ginkel's PdfiumViewer](https://github.com/pvginkel/PdfiumViewer) with added functionality. 
 
 ## Getting started
-Getting started is easy. Just add `PdfiumLight`, `PdfiumViewer.Native.x86.v8-xfa` and /or `PdfiumViewer.Native.x86_64.v8-xfa` (see below)  as a Nuget dependency and you're good to go:
+Getting started is easy. Just add `PdfiumLight`, `PdfiumViewer.Native.x86.v8-xfa` and / or `PdfiumViewer.Native.x86_64.v8-xfa` (see below) as  NuGet dependencies to your project and you're good to go:
 ```c#
 // Load the pdf file and create a new document object
 PdfDocument document = new PdfDocument("C:/Users/Tom/Documents/sample.pdf");
 // Load the first page
 PdfPage page = document.GetPage(0);
 // Render the page
-Image renderedPage = page.Render(1000, 2500, 1, 1, PdfRotation.Rotate0, PdfRenderFlags.None);
+Image renderedPage = page.Render(700, 1200, 1, 1, PdfRotation.Rotate0, PdfRenderFlags.None);
  ```
-### You have to provide an pdfium.dll
-There are many ways to get include pdfium.dll, the most easy one ist by adding one or both of the following NuGet-dependencies created by @pvginkel:
--`PdfiumViewer.Native.x86.v8-xfa` 
--`PdfiumViewer.Native.x86_64.v8-xfa`
+### You have to provide pdfium.dll
+There are many ways to include pdfium.dll, the most easy one is by adding one or both of the following NuGet-dependencies created by @pvginkel:
+
+- `PdfiumViewer.Native.x86.v8-xfa` 
+- `PdfiumViewer.Native.x86_64.v8-xfa`
 
 A very basic packages.config could look like this:
 ```xm
