@@ -21,27 +21,47 @@ namespace PdfiumLight
         /// <summary>
         /// Handle to the page.
         /// </summary>
-        public IntPtr Page { get; private set; }
+        public IntPtr Page
+        {
+            get;
+            private set;
+        }
 
         /// <summary>
         /// Handle to the text page
         /// </summary>
-        public IntPtr TextPage { get; private set; }
+        public IntPtr TextPage
+        {
+            get;
+            private set;
+        }
 
         /// <summary>
         /// Width of the page in pt
         /// </summary>
-        public double Width { get; private set; }
+        public double Width
+        {
+            get;
+            private set;
+        }
 
         /// <summary>
         /// Height of th page in pt
         /// </summary>
-        public double Height { get; private set; }
+        public double Height
+        {
+            get;
+            private set;
+        }
 
         /// <summary>
         /// The index og this page in the document
         /// </summary>
-        public int PageNumber { get; private set; }
+        public int PageNumber
+        {
+            get;
+            private set;
+        }
 
         /// <summary>
         /// Initializes a new instance of PdfPage
@@ -82,22 +102,27 @@ namespace PdfiumLight
 
         }
 
+
         private RectangleF GetBounds(int index)
         {
             NativeMethods.FPDFText_GetCharBox(
-                Page,
-                index,
-                out var left,
-                out var right,
-                out var bottom,
-                out var top
+             Page,
+             index,
+             out
+             var left,
+              out
+             var right,
+              out
+             var bottom,
+              out
+             var top
             );
 
             return new RectangleF(
-                (float)left,
-                (float)top,
-                (float)(right - left),
-                (float)(bottom - top)
+             (float)left,
+             (float)top,
+             (float)(right - left),
+             (float)(bottom - top)
             );
         }
 
@@ -114,50 +139,70 @@ namespace PdfiumLight
             return true;
         }
 
+
+
         /// <summary>
         /// Renders the page.
         /// </summary>
-        /// <param name="width">Render width in px</param>
-        /// <param name="height">Render height in px</param>
-        /// <param name="dpiX"></param>
-        /// <param name="dpiY"></param>
-        /// <param name="rotate">Specify the rotation of the rendered page</param>
-        /// <param name="flags">Render flags</param>
-        /// <returns>The rendered page as an Image</returns>
-        public Image Render(int width, int height, float dpiX, float dpiY, PdfRotation rotate, PdfRenderFlags flags)
+        /// <param name="width">
+        /// The full width of the rendered image in px or percentage (if dpiX and dpiY are specified). 
+        /// If 0, width will be calculated from height using the correct apsect ratio.
+        /// Height and width can not be both set to zero. 
+        /// </param>
+        /// <param name="height">
+        /// The full wiheightth of the rendered image in px or percentage (if dpiX and dpiY are specified). 
+        /// If 0, height will be calculated from height using the correct apsect ratio.
+        /// Height and width can not be both set to zero.
+        /// </param>
+        /// <param name="clipX">X value of the start point of the clipping area</param>
+        /// <param name="clipY">Y value of the start point of the clipping area</param>
+        /// <param name="clipWidth">Width of the clip area</param>
+        /// <param name="clipHeight">Height of the clip area</param>
+        /// <param name="dpiX">DPI to render page. If set, width and height will accept percentage.</param>
+        /// <param name="dpiY">DPI to render page. If set, width and height will accept percentage.</param>
+        /// <param name="rotate">Specify rotation.</param>
+        /// <param name="flags">Specify flags.</param>
+        /// <returns>Image from the page.</returns>
+        public Image Render(int width, int height, int clipX, int clipY, int clipWidth, int clipHeight, float dpiX, float dpiY, PdfRotation rotate, PdfRenderFlags flags)
         {
             if (_disposed)
                 throw new ObjectDisposedException(GetType().Name);
 
-            if ((flags & PdfRenderFlags.CorrectFromDpi) != 0)
+
+            if (height == 0 && width != 0) height = width * (int)(Height / Width);
+            else if (height != 0 && width == 0) width = height * (int)(Width / Height);
+            else if (height == 0 && width == 0) throw new ArgumentException();
+
+            if (dpiX != 0 && dpiY != 0)
             {
-                width = width * (int)dpiX / 72;
-                height = height * (int)dpiY / 72;
+                clipWidth = (int)(clipWidth / 100f * width / 100f * Width *0.013888888888889 * dpiX);
+                clipHeight = (int)(clipHeight / 100f * height / 100f * Height *0.013888888888889 * dpiY);
+                width = (int)(width / 100f * Width *0.013888888888889 * dpiX);
+                height = (int)(height / 100f * Height *0.013888888888889 * dpiY);
             }
 
-            var bitmap = new Bitmap(width, height, PixelFormat.Format32bppArgb);
-            bitmap.SetResolution(dpiX, dpiY);
+            var bitmap = new Bitmap(clipWidth, clipHeight, PixelFormat.Format32bppArgb);
 
-            var data = bitmap.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.ReadWrite, bitmap.PixelFormat);
+
+            var data = bitmap.LockBits(new Rectangle(0, 0, clipWidth, clipHeight), ImageLockMode.ReadWrite, bitmap.PixelFormat);
 
             try
             {
-                var handle = NativeMethods.FPDFBitmap_CreateEx(width, height, 4, data.Scan0, width * 4);
+                var handle = NativeMethods.FPDFBitmap_CreateEx(clipWidth, clipHeight, 4, data.Scan0, clipWidth * 4);
 
 
                 try
                 {
                     uint background = (flags & PdfRenderFlags.Transparent) == 0 ? 0xFFFFFFFF : 0x00FFFFFF;
 
-                    NativeMethods.FPDFBitmap_FillRect(handle, 0, 0, width, height, background);
+                    NativeMethods.FPDFBitmap_FillRect(handle, 0, 0, clipWidth, clipHeight, background);
 
                     bool success = RenderPDFPageToBitmap(
-                        handle,
-                        (int)dpiX, (int)dpiY,
-                        0, 0, width, height,
-                        (int)rotate,
-                        FlagsToFPDFFlags(flags),
-                        (flags & PdfRenderFlags.Annotations) != 0
+                     handle,
+                     (int)dpiX, (int)dpiY, -clipX, -clipY, width, height,
+                     (int)rotate,
+                     FlagsToFPDFFlags(flags),
+                     (flags & PdfRenderFlags.Annotations) != 0
                     );
 
                     if (!success)
@@ -177,7 +222,100 @@ namespace PdfiumLight
             return bitmap;
         }
 
-  
+        /// <summary>
+        /// Renders the page.
+        /// </summary>
+        /// <param name="width">
+        /// The full width of the rendered image in px.
+        /// If 0, width will be calculated from height using the correct apsect ratio.
+        /// Height and width can not be both set to zero. 
+        /// </param>
+        /// <param name="height">
+        /// The full wiheightth of the rendered image in px .
+        /// If 0, height will be calculated from height using the correct apsect ratio.
+        /// Height and width can not be both set to zero.
+        /// </param>
+        /// <param name="rotate">Specify rotation.</param>
+        /// <param name="flags">Specify flags.</param>
+        /// <returns>Image from the page.</returns>
+        public Image Render(int width, int height, PdfRotation rotate, PdfRenderFlags flags)
+        {
+            if (height == 0 && width != 0) height = (int)((float)width * (Height / Width));
+            else if (height != 0 && width == 0) width = (int)((float)height * (int)(Width / Height));
+            else if (height == 0 && width == 0) throw new ArgumentException();
+            return Render(width, height, 0, 0, width, height, 0, 0, rotate, flags);
+        }
+        /// <summary>
+        /// Renders the page.
+        /// </summary>
+        /// <param name="width">
+        /// The full width of the rendered image in px.
+        /// If 0, width will be calculated from height using the correct apsect ratio.
+        /// Height and width can not be both set to zero. 
+        /// </param>
+        /// <param name="height">
+        /// The full wiheightth of the rendered image in px .
+        /// If 0, height will be calculated from height using the correct apsect ratio.
+        /// Height and width can not be both set to zero.
+        /// </param>
+        /// <returns>Image from the page.</returns>
+        public Image Render(int width, int height)
+        {
+            if (height == 0 && width != 0) height = (int)((float)width * (Height / Width));
+            else if (height != 0 && width == 0) width = (int)((float)height * (int)(Width / Height));
+            else if (height == 0 && width == 0) throw new ArgumentException();
+            return Render(width, height, 0, 0, width, height, 0, 0, PdfRotation.Rotate0, PdfRenderFlags.None);
+        }
+
+        /// <summary>
+        /// Renders the page.
+        /// </summary>
+        /// <param name="width">
+        /// The full width of the rendered image in px or percentage (if dpiX and dpiY are specified). 
+        /// If 0, width will be calculated from height using the correct apsect ratio.
+        /// Height and width can not be both set to zero. 
+        /// </param>
+        /// <param name="height">
+        /// The full wiheightth of the rendered image in px or percentage (if dpiX and dpiY are specified). 
+        /// If 0, height will be calculated from height using the correct apsect ratio.
+        /// Height and width can not be both set to zero.
+        /// </param>
+        /// <param name="dpiX">DPI to render page. If set, width and height will accept percentage.</param>
+        /// <param name="dpiY">DPI to render page. If set, width and height will accept percentage.</param>
+        /// <param name="rotate">Specify rotation.</param>
+        /// <param name="flags">Specify flags.</param>
+        /// <returns>Image from the page.</returns>
+        public Image Render(int width, int height, float dpiX, float dpiY, PdfRotation rotate, PdfRenderFlags flags)
+        {
+            return Render(width, height, 0, 0, width, height, dpiX, dpiY, rotate, flags);
+        }
+
+        /// <summary>
+        /// Renders the page.
+        /// </summary>
+        /// <param name="width">
+        /// The full width of the rendered image in px.
+        /// If 0, width will be calculated from height using the correct apsect ratio.
+        /// Height and width can not be both set to zero. 
+        /// </param>
+        /// <param name="height">
+        /// The full wiheightth of the rendered image in px.
+        /// If 0, height will be calculated from height using the correct apsect ratio.
+        /// Height and width can not be both set to zero.
+        /// </param>
+        /// <param name="clipX">X value of the start point of the clipping area</param>
+        /// <param name="clipY">Y value of the start point of the clipping area</param>
+        /// <param name="clipWidth">Width of the clip area</param>
+        /// <param name="clipHeight">Height of the clip area</param>
+        /// <param name="rotate">Specify rotation.</param>
+        /// <param name="flags">Specify flags.</param>
+        /// <returns>Image from the page.</returns>
+        public Image Render(int width, int height, int clipX, int clipY, int clipWidth, int clipHeight, PdfRotation rotate, PdfRenderFlags flags)
+        {
+            return Render(width, height, clipX, clipY, clipWidth, clipHeight, 0, 0, rotate, flags);
+        }
+
+
         private bool RenderPDFPageToBitmap(IntPtr bitmapHandle, int dpiX, int dpiY, int boundsOriginX, int boundsOriginY, int boundsWidth, int boundsHeight, int rotate, NativeMethods.FPDF flags, bool renderFormFill)
         {
             if (_disposed)
@@ -222,16 +360,18 @@ namespace PdfiumLight
         {
 
             NativeMethods.FPDF_DeviceToPage(
-                Page,
-                0,
-                0,
-                renderWidth,
-                renderHeight,
-                0,
-                point.X,
-                point.Y,
-                out var deviceX,
-                out var deviceY
+             Page,
+             0,
+             0,
+             renderWidth,
+             renderHeight,
+             0,
+             point.X,
+             point.Y,
+             out
+             var deviceX,
+              out
+             var deviceY
             );
 
             return new PointF((float)deviceX, (float)deviceY);
@@ -250,36 +390,40 @@ namespace PdfiumLight
         {
 
             NativeMethods.FPDF_DeviceToPage(
-                Page,
-                0,
-                0,
-                renderWidth,
-                renderHeight,
-                0,
-                rect.Left,
-                rect.Top,
-                out var deviceX1,
-                out var deviceY1
+             Page,
+             0,
+             0,
+             renderWidth,
+             renderHeight,
+             0,
+             rect.Left,
+             rect.Top,
+             out
+             var deviceX1,
+              out
+             var deviceY1
             );
 
             NativeMethods.FPDF_DeviceToPage(
-                Page,
-                0,
-                0,
-                renderWidth,
-                renderHeight,
-                0,
-                rect.Right,
-                rect.Bottom,
-                out var deviceX2,
-                out var deviceY2
+             Page,
+             0,
+             0,
+             renderWidth,
+             renderHeight,
+             0,
+             rect.Right,
+             rect.Bottom,
+             out
+             var deviceX2,
+              out
+             var deviceY2
             );
 
             return new RectangleF(
-                (float)deviceX1,
-                (float)deviceY1,
-                (float)Math.Abs((deviceX2 - deviceX1)),
-                (float)Math.Abs((deviceY2 - deviceY1))
+             (float)deviceX1,
+             (float)deviceY1,
+             (float)Math.Abs((deviceX2 - deviceX1)),
+             (float)Math.Abs((deviceY2 - deviceY1))
             );
 
         }
@@ -313,7 +457,7 @@ namespace PdfiumLight
         /// <param name="rotation">Specify the rotation.</param>
         public void RotatePage(PdfRotation rotation)
         {
-                NativeMethods.FPDFPage_SetRotation(Page, rotation);
+            NativeMethods.FPDFPage_SetRotation(Page, rotation);
         }
 
         /// <summary>
@@ -333,10 +477,10 @@ namespace PdfiumLight
                 NativeMethods.FPDFText_GetRect(TextPage, i, out double left, out double top, out double right, out double bottom);
 
                 RectangleF bounds = new RectangleF(
-                    (float)left,
-                    (float)top,
-                    (float)(right - left),
-                    (float)(bottom - top));
+                 (float)left,
+                 (float)top,
+                 (float)(right - left),
+                 (float)(bottom - top));
 
                 if (bounds.Width == 0 || bounds.Height == 0)
                     continue;
@@ -360,36 +504,40 @@ namespace PdfiumLight
         public Rectangle RectangleFromPdf(RectangleF rect, int renderWidth, int renderHeight)
         {
             NativeMethods.FPDF_PageToDevice(
-                Page,
-                0,
-                0,
-                renderWidth,
-                renderHeight,
-                0,
-                rect.Left,
-                rect.Top,
-                out var deviceX1,
-                out var deviceY1
+             Page,
+             0,
+             0,
+             renderWidth,
+             renderHeight,
+             0,
+             rect.Left,
+             rect.Top,
+             out
+             var deviceX1,
+              out
+             var deviceY1
             );
 
             NativeMethods.FPDF_PageToDevice(
-                Page,
-                0,
-                0,
-                renderWidth,
-                renderHeight,
-                0,
-                rect.Right,
-                rect.Bottom,
-                out var deviceX2,
-                out var deviceY2
+             Page,
+             0,
+             0,
+             renderWidth,
+             renderHeight,
+             0,
+             rect.Right,
+             rect.Bottom,
+             out
+             var deviceX2,
+              out
+             var deviceY2
             );
 
             return new Rectangle(
-                Math.Min(deviceX1, deviceX2),
-                Math.Min(deviceY1, deviceY2),
-                Math.Abs(deviceX2 - deviceX1),
-                Math.Abs(deviceY2 - deviceY1)
+             Math.Min(deviceX1, deviceX2),
+             Math.Min(deviceY1, deviceY2),
+             Math.Abs(deviceX2 - deviceX1),
+             Math.Abs(deviceY2 - deviceY1)
             );
 
         }
