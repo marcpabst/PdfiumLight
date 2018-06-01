@@ -8,8 +8,27 @@ Getting started is easy. Just add `PdfiumLight`, `PdfiumViewer.Native.x86.v8-xfa
 PdfDocument document = new PdfDocument("C:/Users/Tom/Documents/sample.pdf");
 // Load the first page
 PdfPage page = document.GetPage(0);
+// Render the page with a width of 1000px and automatically computed height
+var renderedPage = page.Render(1000, 0);
+ ```
+ ### Render part of a page
+ You can specify a clipping rectangle within the original image that would have been rendered only specifying `widht` and `height`. This will render only part of the page, thus beeing much faster than rendering the whole page and clipping afterwards.
+ ```c#
+// Load the pdf file and create a new document object
+PdfDocument document = new PdfDocument("C:/Users/Marc/Documents/sample.pdf");
+// Load the first page
+PdfPage page = document.GetPage(0);
 // Render the page
-Image renderedPage = page.Render(700, 1200, 1, 1, PdfRotation.Rotate0, PdfRenderFlags.None);
+var renderedPage = page.Render(
+         10000, // width in px
+         0, // '0' to compute height according to aspect ratio
+         0, // x of the top/left of clipping rectangle
+         0, // y of the top/left point of clipping rectangle
+         1000, // width of clipping reactangle
+         1000, // height of clipping reactangle
+         PdfRotation.Rotate0, // no rotation
+         PdfRenderFlags.None // no render flags
+);
  ```
 ### You have to provide pdfium.dll
 There are many ways to include pdfium.dll, the most easy one is by adding one or both of the following NuGet-dependencies created by @pvginkel:
@@ -29,7 +48,7 @@ A very basic packages.config could look like this:
 ## Features
 ### (already implemented)
 - load PDF-documents
-- render pages
+- render pages as a whole or partly
 - convert device coordinates to page coordinates and vice versa
 - extract text from page
 - check if there is text at a specific point on the page  (very usefull if implementing a text layer)
@@ -40,5 +59,4 @@ A very basic packages.config could look like this:
 - form support
 ### (wishlist)
 - caching
-- part-by-part rendering (although I'm not sure if Pdfium does support it)
 - simple editing features such as reorder and deleting pages and merging documents
