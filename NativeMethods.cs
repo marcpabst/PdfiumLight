@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
 using System.Security.Permissions;
-using System.Text;
-using System.Windows.Forms;
 using Microsoft.Win32.SafeHandles;
 
 namespace PdfiumLight
