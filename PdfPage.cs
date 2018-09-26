@@ -76,10 +76,7 @@ namespace PdfiumLight
 
                 _disposed = true;
             }
-
-
         }
-
 
         private RectangleF GetBounds(int index)
         {
