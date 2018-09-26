@@ -11,7 +11,6 @@ namespace PdfiumLight
     /// </summary>
     public class PdfPage : IDisposable
     {
-
         private static readonly Encoding FPDFEncoding = new UnicodeEncoding(false, false, false);
 
         private readonly IntPtr _form;
@@ -20,47 +19,27 @@ namespace PdfiumLight
         /// <summary>
         /// Handle to the page.
         /// </summary>
-        public IntPtr Page
-        {
-            get;
-            private set;
-        }
+        public IntPtr Page { get; private set; }
 
         /// <summary>
         /// Handle to the text page
         /// </summary>
-        public IntPtr TextPage
-        {
-            get;
-            private set;
-        }
+        public IntPtr TextPage { get; private set; }
 
         /// <summary>
         /// Width of the page in pt
         /// </summary>
-        public double Width
-        {
-            get;
-            private set;
-        }
+        public double Width { get; private set; }
 
         /// <summary>
         /// Height of th page in pt
         /// </summary>
-        public double Height
-        {
-            get;
-            private set;
-        }
+        public double Height { get; private set; }
 
         /// <summary>
         /// The index og this page in the document
         /// </summary>
-        public int PageNumber
-        {
-            get;
-            private set;
-        }
+        public int PageNumber { get; private set; }
 
         /// <summary>
         /// Initializes a new instance of PdfPage
@@ -105,40 +84,31 @@ namespace PdfiumLight
         private RectangleF GetBounds(int index)
         {
             NativeMethods.FPDFText_GetCharBox(
-             Page,
-             index,
-             out
-             var left,
-              out
-             var right,
-              out
-             var bottom,
-              out
-             var top
+                Page,
+                index,
+                out double left,
+                out double right,
+                out double bottom,
+                out double top
             );
 
             return new RectangleF(
-             (float)left,
-             (float)top,
-             (float)(right - left),
-             (float)(bottom - top)
+                (float)left,
+                (float)top,
+                (float)(right - left),
+                (float)(bottom - top)
             );
         }
-
 
         private bool RenderPDFPageToDC(IntPtr dc, int dpiX, int dpiY, int boundsOriginX, int boundsOriginY, int boundsWidth, int boundsHeight, NativeMethods.FPDF flags)
         {
             if (_disposed)
                 throw new ObjectDisposedException(GetType().Name);
 
-
             NativeMethods.FPDF_RenderPage(dc, Page, boundsOriginX, boundsOriginY, boundsWidth, boundsHeight, 0, flags);
-
 
             return true;
         }
-
-
 
         /// <summary>
         /// Renders the page.
@@ -167,28 +137,34 @@ namespace PdfiumLight
             if (_disposed)
                 throw new ObjectDisposedException(GetType().Name);
 
-
-            if (height == 0 && width != 0) height = width * (int)(Height / Width);
-            else if (height != 0 && width == 0) width = height * (int)(Width / Height);
-            else if (height == 0 && width == 0) throw new ArgumentException();
+            if (height == 0 && width != 0)
+            {
+                height = width * (int)(Height / Width);
+            }
+            else if (height != 0 && width == 0)
+            {
+                width = height * (int)(Width / Height);
+            }
+            else if (height == 0 && width == 0)
+            {
+                throw new ArgumentException();
+            }
 
             if (dpiX != 0 && dpiY != 0)
             {
-                clipWidth = (int)(clipWidth / 100f * width / 100f * Width *0.013888888888889 * dpiX);
-                clipHeight = (int)(clipHeight / 100f * height / 100f * Height *0.013888888888889 * dpiY);
-                width = (int)(width / 100f * Width *0.013888888888889 * dpiX);
-                height = (int)(height / 100f * Height *0.013888888888889 * dpiY);
+                clipWidth = (int)(clipWidth / 100f * width / 100f * Width * 0.013888888888889 * dpiX);
+                clipHeight = (int)(clipHeight / 100f * height / 100f * Height * 0.013888888888889 * dpiY);
+                width = (int)(width / 100f * Width * 0.013888888888889 * dpiX);
+                height = (int)(height / 100f * Height * 0.013888888888889 * dpiY);
             }
 
             var bitmap = new Bitmap(clipWidth, clipHeight, PixelFormat.Format32bppArgb);
-
 
             var data = bitmap.LockBits(new Rectangle(0, 0, clipWidth, clipHeight), ImageLockMode.ReadWrite, bitmap.PixelFormat);
 
             try
             {
                 var handle = NativeMethods.FPDFBitmap_CreateEx(clipWidth, clipHeight, 4, data.Scan0, clipWidth * 4);
-
 
                 try
                 {
@@ -197,11 +173,11 @@ namespace PdfiumLight
                     NativeMethods.FPDFBitmap_FillRect(handle, 0, 0, clipWidth, clipHeight, background);
 
                     bool success = RenderPDFPageToBitmap(
-                     handle,
-                     (int)dpiX, (int)dpiY, -clipX, -clipY, width, height,
-                     (int)rotate,
-                     FlagsToFPDFFlags(flags),
-                     (flags & PdfRenderFlags.Annotations) != 0
+                        handle,
+                        (int)dpiX, (int)dpiY, -clipX, -clipY, width, height,
+                        (int)rotate,
+                        FlagsToFPDFFlags(flags),
+                        (flags & PdfRenderFlags.Annotations) != 0
                     );
 
                     if (!success)
@@ -244,6 +220,7 @@ namespace PdfiumLight
             else if (height == 0 && width == 0) throw new ArgumentException();
             return Render(width, height, 0, 0, width, height, 0, 0, rotate, flags);
         }
+
         /// <summary>
         /// Renders the page.
         /// </summary>
@@ -314,12 +291,10 @@ namespace PdfiumLight
             return Render(width, height, clipX, clipY, clipWidth, clipHeight, 0, 0, rotate, flags);
         }
 
-
         private bool RenderPDFPageToBitmap(IntPtr bitmapHandle, int dpiX, int dpiY, int boundsOriginX, int boundsOriginY, int boundsWidth, int boundsHeight, int rotate, NativeMethods.FPDF flags, bool renderFormFill)
         {
             if (_disposed)
                 throw new ObjectDisposedException(GetType().Name);
-
 
             if (renderFormFill)
                 flags &= ~NativeMethods.FPDF.ANNOT;
@@ -327,12 +302,12 @@ namespace PdfiumLight
             NativeMethods.FPDF_RenderPageBitmap(bitmapHandle, Page, boundsOriginX, boundsOriginY, boundsWidth, boundsHeight, rotate, flags);
 
             if (renderFormFill)
+            {
                 NativeMethods.FPDF_FFLDraw(_form, bitmapHandle, Page, boundsOriginX, boundsOriginY, boundsWidth, boundsHeight, rotate, flags);
-
+            }
 
             return true;
         }
-
 
         /// <summary>
         /// Gets the index of the character at the provided position
@@ -343,9 +318,7 @@ namespace PdfiumLight
         /// <returns>The zero-based index of the character at, or nearby the point (x,y). If there is no character at or nearby the point, return value will be -1. If an error occurs, -3 will be returned.</returns>
         public int GetCharIndexAtPos(double x, double y, double tol = 12)
         {
-
             return NativeMethods.FPDFText_GetCharIndexAtPos(TextPage, x, y, tol, tol);
-
         }
 
         /// <summary>
@@ -367,14 +340,11 @@ namespace PdfiumLight
              0,
              point.X,
              point.Y,
-             out
-             var deviceX,
-              out
-             var deviceY
+             out double deviceX,
+             out double deviceY
             );
 
             return new PointF((float)deviceX, (float)deviceY);
-
         }
 
         /// <summary>
@@ -389,33 +359,29 @@ namespace PdfiumLight
         {
 
             NativeMethods.FPDF_DeviceToPage(
-             Page,
-             0,
-             0,
-             renderWidth,
-             renderHeight,
-             0,
-             rect.Left,
-             rect.Top,
-             out
-             var deviceX1,
-              out
-             var deviceY1
+                Page,
+                0,
+                0,
+                renderWidth,
+                renderHeight,
+                0,
+                rect.Left,
+                rect.Top,
+                out double deviceX1,
+                out double deviceY1
             );
 
             NativeMethods.FPDF_DeviceToPage(
-             Page,
-             0,
-             0,
-             renderWidth,
-             renderHeight,
-             0,
-             rect.Right,
-             rect.Bottom,
-             out
-             var deviceX2,
-              out
-             var deviceY2
+                Page,
+                0,
+                0,
+                renderWidth,
+                renderHeight,
+                0,
+                rect.Right,
+                rect.Bottom,
+                out double deviceX2,
+                out double deviceY2
             );
 
             return new RectangleF(
@@ -435,7 +401,6 @@ namespace PdfiumLight
         {
             int length = NativeMethods.FPDFText_CountChars(TextPage);
             return GetPdfText(0, length);
-
         }
 
         /// <summary>
@@ -449,15 +414,11 @@ namespace PdfiumLight
             return FPDFEncoding.GetString(result, 0, length * 2);
         }
 
-
         /// <summary>
         /// Rotates the page.
         /// </summary>
         /// <param name="rotation">Specify the rotation.</param>
-        public void RotatePage(PdfRotation rotation)
-        {
-            NativeMethods.FPDFPage_SetRotation(Page, rotation);
-        }
+        public void RotatePage(PdfRotation rotation) => NativeMethods.FPDFPage_SetRotation(Page, rotation);
 
         /// <summary>
         /// Get the bounds of the text (specified by index and length) from the page. 
@@ -485,8 +446,6 @@ namespace PdfiumLight
                     continue;
 
                 result.Add(new PdfRectangle(PageNumber, bounds));
-
-
             }
 
             return result;
@@ -503,33 +462,29 @@ namespace PdfiumLight
         public Rectangle RectangleFromPdf(RectangleF rect, int renderWidth, int renderHeight)
         {
             NativeMethods.FPDF_PageToDevice(
-             Page,
-             0,
-             0,
-             renderWidth,
-             renderHeight,
-             0,
-             rect.Left,
-             rect.Top,
-             out
-             var deviceX1,
-              out
-             var deviceY1
+                Page,
+                0,
+                0,
+                renderWidth,
+                renderHeight,
+                0,
+                rect.Left,
+                rect.Top,
+                out int deviceX1,
+                out int deviceY1
             );
 
             NativeMethods.FPDF_PageToDevice(
-             Page,
-             0,
-             0,
-             renderWidth,
-             renderHeight,
-             0,
-             rect.Right,
-             rect.Bottom,
-             out
-             var deviceX2,
-              out
-             var deviceY2
+                Page,
+                0,
+                0,
+                renderWidth,
+                renderHeight,
+                0,
+                rect.Right,
+                rect.Bottom,
+                out int deviceX2,
+                out int deviceY2
             );
 
             return new Rectangle(
