@@ -260,16 +260,16 @@ namespace PdfiumLight
 
                 string formattedDate = $"{year}-{month}-{day}T{hour}:{minute}:{second}.0000000";
 
-                if (!string.IsNullOrEmpty(tzOffset))
+                if (tzOffset != null && tzOffset.Length == 1)
                 {
-                    switch (tzOffset)
+                    switch (tzOffset[0])
                     {
-                        case "Z":
-                        case "z":
+                        case 'Z':
+                        case 'z':
                             formattedDate += "+0";
                             break;
-                        case "+":
-                        case "-":
+                        case '+':
+                        case '-':
                             formattedDate += $"{tzOffset}{tzHour}:{tzMinute}";
                             break;
                     }
