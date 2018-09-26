@@ -27,9 +27,7 @@ namespace PdfiumLight
 
         public override bool Equals(object obj)
         {
-            return
-                obj is PdfTextSpan &&
-                Equals((PdfTextSpan)obj);
+            return obj is PdfTextSpan other && Equals((PdfTextSpan)obj);
         }
 
         public override int GetHashCode()

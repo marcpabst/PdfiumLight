@@ -10,10 +10,10 @@ namespace PdfiumLight
             if (stream == null)
                 throw new ArgumentNullException("stream");
 
-            var memoryStream = stream as MemoryStream;
-
-            if (memoryStream != null)
+            if (stream is MemoryStream memoryStream)
+            {
                 return memoryStream.ToArray();
+            }
 
             if (stream.CanSeek)
                 return ReadBytesFast(stream);

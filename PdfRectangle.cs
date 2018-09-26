@@ -46,9 +46,7 @@ namespace PdfiumLight
 
         public override bool Equals(object obj)
         {
-            return
-                obj is PdfRectangle &&
-                Equals((PdfRectangle)obj);
+            return obj is PdfRectangle other && Equals(other);
         }
 
         public override int GetHashCode()

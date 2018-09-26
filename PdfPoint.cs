@@ -39,9 +39,7 @@ namespace PdfiumLight
 
         public override bool Equals(object obj)
         {
-            return
-                obj is PdfPoint &&
-                Equals((PdfPoint)obj);
+            return obj is PdfPoint other && Equals(other);
         }
 
         public override int GetHashCode()
