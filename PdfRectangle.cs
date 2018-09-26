@@ -5,25 +5,9 @@ using System.Drawing;
 
 namespace PdfiumLight
 {
-    public struct PdfRectangle : IEquatable<PdfRectangle>
+    public readonly struct PdfRectangle : IEquatable<PdfRectangle>
     {
         public static readonly PdfRectangle Empty = new PdfRectangle();
-
-        // _page is offset by 1 so that Empty returns an invalid rectangle.
-        private readonly int _page;
-
-        public int Page
-        {
-            get { return _page - 1; }
-        }
-
-
-        public RectangleF Bounds { get; }
-
-        public bool IsValid
-        {
-            get { return _page != 0; }
-        }
 
         public PdfRectangle(int page, RectangleF bounds)
         {
@@ -36,6 +20,17 @@ namespace PdfiumLight
             _page = page + 1;
             Bounds = bounds;
         }
+
+
+        // _page is offset by 1 so that Empty returns an invalid rectangle.
+        private readonly int _page;
+
+        public int Page => _page - 1;
+
+        public RectangleF Bounds { get; }
+
+        public bool IsValid => _page != 0;
+
 
         public bool Equals(PdfRectangle other)
         {
