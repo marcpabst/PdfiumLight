@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.IO;
 
 #pragma warning disable 1591
 
@@ -15,7 +14,7 @@ namespace PdfiumLight
         // library is not thread safe, and this way of locking
         // guarantees that we don't access the Pdfium library from different
         // threads, even when there are multiple AppDomain's in play.
-        private static readonly string LockString = String.Intern("e362349b-001d-4cb2-bf55-a71606a3e36f");
+        private static readonly string LockString = string.Intern("e362349b-001d-4cb2-bf55-a71606a3e36f");
 
         public static void FPDF_AddRef()
         {
@@ -136,7 +135,7 @@ namespace PdfiumLight
                 return Imports.FPDF_LoadPage(document, page_index);
             }
         }
-        
+
 
         public static void FPDFPage_SetCropBox(IntPtr page_object, float left, float bottom, float right, float top)
         {
@@ -425,7 +424,9 @@ namespace PdfiumLight
         public static IntPtr FPDF_BookmarkGetFirstChild(IntPtr document, IntPtr bookmark)
         {
             lock (LockString)
+            {
                 return Imports.FPDFBookmark_GetFirstChild(document, bookmark);
+            }
         }
 
         public static IntPtr FPDF_BookmarkGetNextSibling(IntPtr document, IntPtr bookmark)
@@ -585,7 +586,7 @@ namespace PdfiumLight
         {
             lock (LockString)
             {
-                return Imports.FPDFText_CountRects(text_page, start_index,count);
+                return Imports.FPDFText_CountRects(text_page, start_index, count);
             }
         }
 
@@ -597,7 +598,7 @@ namespace PdfiumLight
             }
         }
 
-   
+
 
         public static void FPDF_FFLDraw(IntPtr form, IntPtr bitmap, IntPtr page, int start_x, int start_y, int size_x, int size_y, int rotate, FPDF flags)
         {
@@ -667,7 +668,7 @@ namespace PdfiumLight
             [DllImport("pdfium.dll")]
             public static extern void FPDF_Release();
 
-            [DllImport("pdfium.dll", CharSet = CharSet.Ansi)]            
+            [DllImport("pdfium.dll", CharSet = CharSet.Ansi)]
             public static extern IntPtr FPDF_LoadCustomDocument([MarshalAs(UnmanagedType.LPStruct)]FPDF_FILEACCESS access, string password);
 
             [DllImport("pdfium.dll", CharSet = CharSet.Ansi)]
@@ -718,7 +719,7 @@ namespace PdfiumLight
 
             [DllImport("pdfium.dll")]
             public static extern IntPtr FPDFPageObj_NewPathObj();
-           
+
 
             [DllImport("pdfium.dll")]
             public static extern void FPDFPathObj_InsertPoint(IntPtr path_object, double x, double y, int flag);
