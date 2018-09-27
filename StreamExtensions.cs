@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
 
 namespace PdfiumLight
 {
@@ -10,12 +8,12 @@ namespace PdfiumLight
         public static byte[] ToByteArray(Stream stream)
         {
             if (stream == null)
-                throw new ArgumentNullException("stream");
+                throw new ArgumentNullException(nameof(stream));
 
-            var memoryStream = stream as MemoryStream;
-
-            if (memoryStream != null)
+            if (stream is MemoryStream memoryStream)
+            {
                 return memoryStream.ToArray();
+            }
 
             if (stream.CanSeek)
                 return ReadBytesFast(stream);
@@ -57,9 +55,10 @@ namespace PdfiumLight
         public static void CopyStream(Stream from, Stream to)
         {
             if (@from == null)
-                throw new ArgumentNullException("from");
+                throw new ArgumentNullException(nameof(from));
+
             if (to == null)
-                throw new ArgumentNullException("to");
+                throw new ArgumentNullException(nameof(to));
 
             var buffer = new byte[4096];
 

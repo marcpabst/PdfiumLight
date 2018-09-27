@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -24,7 +22,6 @@ namespace PdfiumLight
         private GCHandle _formCallbacksHandle;
         private int _id;
         private Stream _stream;
-
 
         /// <summary>
         /// The Bookmarks of this PDF document. 
@@ -56,12 +53,9 @@ namespace PdfiumLight
 
         private void LoadFile(Stream stream, string password)
         {
-            if (stream == null)
-                throw new ArgumentNullException(nameof(stream));
-
             PdfLibrary.EnsureLoaded();
 
-            _stream = stream;
+            _stream = stream ?? throw new ArgumentNullException(nameof(stream));
             _id = StreamManager.Register(stream);
 
             var document = NativeMethods.FPDF_LoadCustomDocument(stream, password, _id);
@@ -70,7 +64,6 @@ namespace PdfiumLight
 
             LoadDocument(document);
         }
-
 
         /// <summary>
         /// This method returns the dimension of the pages in this document without loading them into memory first
@@ -99,9 +92,7 @@ namespace PdfiumLight
         /// <returns>Dimesions as SizeF</returns>
         public SizeF GetPageSize(int pageNumber)
         {
-            double height;
-            double width;
-            NativeMethods.FPDF_GetPageSizeByIndex(_document, pageNumber, out width, out height);
+            NativeMethods.FPDF_GetPageSizeByIndex(_document, pageNumber, out double width, out double height);
 
             return new SizeF((float)width, (float)height);
         }
@@ -201,20 +192,13 @@ namespace PdfiumLight
         /// </summary>
         /// <param name="page">The null-based index of the page</param>
         /// <returns>A new PdfPage</returns>
-        public PdfPage GetPage(int page)
-        {
-            return new PdfPage(_document, _form, page);
-        }
+        public PdfPage GetPage(int page) => new PdfPage(_document, _form, page);
 
         /// <summary>
         /// Returns the page count of the document. This will call a native Pdfium function.
         /// </summary>
         /// <returns></returns>
-        public int PageCount()
-        {
-            return NativeMethods.FPDF_GetPageCount(_document);
-        }
-
+        public int PageCount() => NativeMethods.FPDF_GetPageCount(_document);
 
         /// <summary>
         /// Dtailed meta informations from the PDF document
@@ -222,18 +206,17 @@ namespace PdfiumLight
         /// <returns>A PdfInformation containing the metadata</returns>
         public PdfInformation GetInformation()
         {
-            var pdfInfo = new PdfInformation();
-
-            pdfInfo.Creator = GetMetaText("Creator");
-            pdfInfo.Title = GetMetaText("Title");
-            pdfInfo.Author = GetMetaText("Author");
-            pdfInfo.Subject = GetMetaText("Subject");
-            pdfInfo.Keywords = GetMetaText("Keywords");
-            pdfInfo.Producer = GetMetaText("Producer");
-            pdfInfo.CreationDate = GetMetaTextAsDate("CreationDate");
-            pdfInfo.ModificationDate = GetMetaTextAsDate("ModDate");
-
-            return pdfInfo;
+            return new PdfInformation
+            {
+                Creator = GetMetaText("Creator"),
+                Title = GetMetaText("Title"),
+                Author = GetMetaText("Author"),
+                Subject = GetMetaText("Subject"),
+                Keywords = GetMetaText("Keywords"),
+                Producer = GetMetaText("Producer"),
+                CreationDate = GetMetaTextAsDate("CreationDate"),
+                ModificationDate = GetMetaTextAsDate("ModDate")
+            };
         }
 
         private string GetMetaText(string tag)
@@ -277,16 +260,16 @@ namespace PdfiumLight
 
                 string formattedDate = $"{year}-{month}-{day}T{hour}:{minute}:{second}.0000000";
 
-                if (!string.IsNullOrEmpty(tzOffset))
+                if (tzOffset != null && tzOffset.Length == 1)
                 {
-                    switch (tzOffset)
+                    switch (tzOffset[0])
                     {
-                        case "Z":
-                        case "z":
+                        case 'Z':
+                        case 'z':
                             formattedDate += "+0";
                             break;
-                        case "+":
-                        case "-":
+                        case '+':
+                        case '-':
                             formattedDate += $"{tzOffset}{tzHour}:{tzMinute}";
                             break;
                     }
@@ -347,9 +330,6 @@ namespace PdfiumLight
 
                 _disposed = true;
             }
-
         }
-
     }
-  
 }

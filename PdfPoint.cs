@@ -1,30 +1,22 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Text;
 
 #pragma warning disable 1591
 
 namespace PdfiumLight
 {
-    public struct PdfPoint : IEquatable<PdfPoint>
+    public readonly struct PdfPoint : IEquatable<PdfPoint>
     {
         public static readonly PdfPoint Empty = new PdfPoint();
 
         // _page is offset by 1 so that Empty returns an invalid point.
         private readonly int _page;
 
-        public int Page
-        {
-            get { return _page - 1; }
-        }
+        public int Page => _page - 1;
 
         public PointF Location { get; }
 
-        public bool IsValid
-        {
-            get { return _page != 0; }
-        }
+        public bool IsValid => _page != 0;
 
         public PdfPoint(int page, PointF location)
         {
@@ -41,9 +33,7 @@ namespace PdfiumLight
 
         public override bool Equals(object obj)
         {
-            return
-                obj is PdfPoint &&
-                Equals((PdfPoint)obj);
+            return obj is PdfPoint other && Equals(other);
         }
 
         public override int GetHashCode()

@@ -1,31 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Text;
 
 #pragma warning disable 1591
 
 namespace PdfiumLight
 {
-    public struct PdfRectangle : IEquatable<PdfRectangle>
+    public readonly struct PdfRectangle : IEquatable<PdfRectangle>
     {
         public static readonly PdfRectangle Empty = new PdfRectangle();
-
-        // _page is offset by 1 so that Empty returns an invalid rectangle.
-        private readonly int _page;
-
-        public int Page
-        {
-            get { return _page - 1; }
-        }
-
-
-        public RectangleF Bounds { get; }
-
-        public bool IsValid
-        {
-            get { return _page != 0; }
-        }
 
         public PdfRectangle(int page, RectangleF bounds)
         {
@@ -39,6 +21,17 @@ namespace PdfiumLight
             Bounds = bounds;
         }
 
+
+        // _page is offset by 1 so that Empty returns an invalid rectangle.
+        private readonly int _page;
+
+        public int Page => _page - 1;
+
+        public RectangleF Bounds { get; }
+
+        public bool IsValid => _page != 0;
+
+
         public bool Equals(PdfRectangle other)
         {
             return
@@ -48,9 +41,7 @@ namespace PdfiumLight
 
         public override bool Equals(object obj)
         {
-            return
-                obj is PdfRectangle &&
-                Equals((PdfRectangle)obj);
+            return obj is PdfRectangle other && Equals(other);
         }
 
         public override int GetHashCode()

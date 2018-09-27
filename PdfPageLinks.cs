@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Text;
 
 namespace PdfiumLight
 {
@@ -22,7 +21,7 @@ namespace PdfiumLight
         public PdfPageLinks(IList<PdfPageLink> links)
         {
             if (links == null)
-                throw new ArgumentNullException("links");
+                throw new ArgumentNullException(nameof(links));
 
             Links = new ReadOnlyCollection<PdfPageLink>(links);
         }
