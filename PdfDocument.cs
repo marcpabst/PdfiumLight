@@ -69,7 +69,7 @@ namespace PdfiumLight
         /// This method returns the dimension of the pages in this document without loading them into memory first
         /// </summary>
         /// <returns>The List of page dimensions</returns>
-        public List<SizeF> GetPageSize()
+        public SizeF[] GetPageSize()
         {
             if (_disposed)
             {
@@ -77,11 +77,12 @@ namespace PdfiumLight
             }
 
             int pageCount = NativeMethods.FPDF_GetPageCount(_document);
-            var result = new List<SizeF>(pageCount);
+
+            var result = new SizeF[pageCount];
 
             for (int i = 0; i < pageCount; i++)
             {
-                result.Add(GetPageSize(i));
+                result[i] = GetPageSize(i);
             }
 
             return result;
@@ -131,7 +132,7 @@ namespace PdfiumLight
             NativeMethods.FORM_DoDocumentJSAction(_form);
             NativeMethods.FORM_DoDocumentOpenAction(_form);
 
-        
+
             Bookmarks = LoadBookmarks(NativeMethods.FPDF_BookmarkGetFirstChild(document, IntPtr.Zero));
         }
 

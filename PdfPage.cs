@@ -429,11 +429,11 @@ namespace PdfiumLight
         /// <param name="startIndex">The start index of the text</param>
         /// <param name="length">The length of the text</param>
         /// <returns>List of the bounds for the text</returns>
-        public IList<PdfRectangle> GetTextBounds(int startIndex, int length)
+        public PdfRectangle[] GetTextBounds(int startIndex, int length)
         {
-            var result = new List<PdfRectangle>();
-
             int countRects = NativeMethods.FPDFText_CountRects(TextPage, startIndex, length);
+
+            var result = new PdfRectangle[countRects];
 
             for (int i = 0; i < countRects; i++)
             {
@@ -448,7 +448,7 @@ namespace PdfiumLight
                 if (bounds.Width == 0 || bounds.Height == 0)
                     continue;
 
-                result.Add(new PdfRectangle(PageNumber, bounds));
+                result[i] = new PdfRectangle(PageNumber, bounds);
             }
 
             return result;
