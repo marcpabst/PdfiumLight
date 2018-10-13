@@ -1,21 +1,21 @@
 ﻿using System;
 
-#pragma warning disable 1591
-
 namespace PdfiumLight
 {
-    public struct PdfTextSpan : IEquatable<PdfTextSpan>
+    public readonly struct PdfTextSpan : IEquatable<PdfTextSpan>
     {
-        public int Page { get; }
-        public int Offset { get; }
-        public int Length { get; }
-
         public PdfTextSpan(int page, int offset, int length)
         {
             Page = page;
             Offset = offset;
             Length = length;
         }
+
+        public int Page { get; }
+
+        public int Offset { get; }
+
+        public int Length { get; }
 
         public bool Equals(PdfTextSpan other)
         {
