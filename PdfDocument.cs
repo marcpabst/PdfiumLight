@@ -35,7 +35,7 @@ namespace PdfiumLight
         /// <param name="password">Password to decrypt PDF</param>
         public PdfDocument(string path, string password = null)
         {
-            if (path == null)
+            if (path is null)
                 throw new ArgumentNullException(nameof(path));
 
             LoadFile(File.OpenRead(path), password);

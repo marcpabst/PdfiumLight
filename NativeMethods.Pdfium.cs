@@ -623,7 +623,7 @@ namespace PdfiumLight
         private static int FPDF_GetBlock(IntPtr param, uint position, IntPtr buffer, uint size)
         {
             var stream = StreamManager.Get((int)param);
-            if (stream == null)
+            if (stream is null)
                 return 0;
             byte[] managedBuffer = new byte[size];
 
@@ -642,7 +642,7 @@ namespace PdfiumLight
             Marshal.PtrToStructure(fileWrite, write);
 
             var stream = StreamManager.Get((int)write.stream);
-            if (stream == null)
+            if (stream is null)
                 return 0;
 
             byte[] buffer = new byte[size];

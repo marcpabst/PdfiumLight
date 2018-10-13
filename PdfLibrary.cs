@@ -11,7 +11,7 @@ namespace PdfiumLight
         {
             lock (_syncRoot)
             {
-                if (_library == null)
+                if (_library is null)
                     _library = new PdfLibrary();
             }
         }

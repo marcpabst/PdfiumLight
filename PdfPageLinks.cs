@@ -20,7 +20,7 @@ namespace PdfiumLight
         /// <param name="links">The links on the PDF page.</param>
         public PdfPageLinks(IList<PdfPageLink> links)
         {
-            if (links == null)
+            if (links is null)
                 throw new ArgumentNullException(nameof(links));
 
             Links = new ReadOnlyCollection<PdfPageLink>(links);

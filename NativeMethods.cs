@@ -20,7 +20,7 @@ namespace PdfiumLight
 
         private static bool TryLoadNativeLibrary(string path)
         {
-            if (path == null)
+            if (path is null)
                 return false;
 
             path = Path.Combine(path, IntPtr.Size == 4 ? "x86" : "x64");

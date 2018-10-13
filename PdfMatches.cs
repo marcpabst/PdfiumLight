@@ -17,7 +17,7 @@
 
 //        public PdfMatches(int startPage, int endPage, IList<PdfMatch> matches)
 //        {
-//            if (matches == null)
+//            if (matches is null)
 //                throw new ArgumentNullException("matches");
 
 //            StartPage = startPage;
