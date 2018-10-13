@@ -24,11 +24,6 @@ namespace PdfiumLight
         private Stream _stream;
 
         /// <summary>
-        /// The Bookmarks of this PDF document. 
-        /// </summary>
-        public PdfBookmarkCollection Bookmarks { get; private set; }
-
-        /// <summary>
         /// Initializes a new instance of PdfDocument
         /// </summary>
         /// <param name="path">The path to the PDF-file</param>
@@ -51,6 +46,11 @@ namespace PdfiumLight
             LoadFile(stream, password);
         }
 
+        /// <summary>
+        /// The Bookmarks of this PDF document. 
+        /// </summary>
+        public PdfBookmarkCollection Bookmarks { get; private set; }
+
         private void LoadFile(Stream stream, string password)
         {
             PdfLibrary.EnsureLoaded();
@@ -59,8 +59,11 @@ namespace PdfiumLight
             _id = StreamManager.Register(stream);
 
             var document = NativeMethods.FPDF_LoadCustomDocument(stream, password, _id);
+
             if (document == IntPtr.Zero)
+            {
                 throw new PdfException((PdfError)NativeMethods.FPDF_GetLastError());
+            }
 
             LoadDocument(document);
         }
@@ -123,7 +126,9 @@ namespace PdfiumLight
 
                 _form = NativeMethods.FPDFDOC_InitFormFillEnvironment(_document, _formCallbacks);
                 if (_form != IntPtr.Zero)
+                {
                     break;
+                }
             }
 
             NativeMethods.FPDF_SetFormFieldHighlightColor(_form, 0, 0xFFE4DD);
@@ -143,8 +148,11 @@ namespace PdfiumLight
                 return result;
 
             result.Add(LoadBookmark(bookmark));
+
             while ((bookmark = NativeMethods.FPDF_BookmarkGetNextSibling(_document, bookmark)) != IntPtr.Zero)
+            {
                 result.Add(LoadBookmark(bookmark));
+            }
 
             return result;
         }
@@ -157,13 +165,16 @@ namespace PdfiumLight
                 PageIndex = (int)GetBookmarkPageIndex(bookmark)
             };
 
-            //Action = NativeMethods.FPDF_BookmarkGetAction(_bookmark);
-            //if (Action != IntPtr.Zero)
+            // Action = NativeMethods.FPDF_BookmarkGetAction(_bookmark);
+            // if (Action != IntPtr.Zero)
             //    ActionType = NativeMethods.FPDF_ActionGetType(Action);
 
             var child = NativeMethods.FPDF_BookmarkGetFirstChild(_document, bookmark);
+
             if (child != IntPtr.Zero)
+            {
                 pdfbookmark.Children = LoadBookmarks(child);
+            }
 
             return pdfbookmark;
         }
@@ -175,8 +186,11 @@ namespace PdfiumLight
             NativeMethods.FPDF_BookmarkGetTitle(bookmark, buffer, length);
 
             string result = Encoding.Unicode.GetString(buffer);
+
             if (result.Length > 0 && result[result.Length - 1] == 0)
+            {
                 result = result.Substring(0, result.Length - 1);
+            }
 
             return result;
         }
@@ -184,10 +198,10 @@ namespace PdfiumLight
         private uint GetBookmarkPageIndex(IntPtr bookmark)
         {
             IntPtr dest = NativeMethods.FPDF_BookmarkGetDest(_document, bookmark);
-            if (dest != IntPtr.Zero)
-                return NativeMethods.FPDFDest_GetPageIndex(_document, dest);
 
-            return 0;
+            return (dest != IntPtr.Zero)
+                ? NativeMethods.FPDFDest_GetPageIndex(_document, dest)
+                : 0u;
         }
 
         /// <summary>
