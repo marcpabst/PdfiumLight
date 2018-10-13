@@ -72,7 +72,9 @@ namespace PdfiumLight
         public List<SizeF> GetPageSize()
         {
             if (_disposed)
-                throw new ObjectDisposedException(GetType().Name);
+            {
+                throw new ObjectDisposedException(nameof(PdfDocument));
+            }
 
             int pageCount = NativeMethods.FPDF_GetPageCount(_document);
             var result = new List<SizeF>(pageCount);

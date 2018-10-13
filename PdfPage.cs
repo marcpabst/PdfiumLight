@@ -100,7 +100,9 @@ namespace PdfiumLight
         private bool RenderPDFPageToDC(IntPtr dc, int dpiX, int dpiY, int boundsOriginX, int boundsOriginY, int boundsWidth, int boundsHeight, NativeMethods.FPDF flags)
         {
             if (_disposed)
-                throw new ObjectDisposedException(GetType().Name);
+            {
+                throw new ObjectDisposedException(nameof(PdfPage));
+            }
 
             NativeMethods.FPDF_RenderPage(dc, Page, boundsOriginX, boundsOriginY, boundsWidth, boundsHeight, 0, flags);
 
@@ -132,7 +134,9 @@ namespace PdfiumLight
         public Image Render(int width, int height, int clipX, int clipY, int clipWidth, int clipHeight, float dpiX, float dpiY, PdfRotation rotate, PdfRenderFlags flags)
         {
             if (_disposed)
-                throw new ObjectDisposedException(GetType().Name);
+            {
+                throw new ObjectDisposedException(nameof(PdfPage));
+            }
 
             if (height == 0 && width != 0)
             {
@@ -291,7 +295,9 @@ namespace PdfiumLight
         private bool RenderPDFPageToBitmap(IntPtr bitmapHandle, int dpiX, int dpiY, int boundsOriginX, int boundsOriginY, int boundsWidth, int boundsHeight, int rotate, NativeMethods.FPDF flags, bool renderFormFill)
         {
             if (_disposed)
-                throw new ObjectDisposedException(GetType().Name);
+            {
+                throw new ObjectDisposedException(nameof(PdfPage));
+            }
 
             if (renderFormFill)
                 flags &= ~NativeMethods.FPDF.ANNOT;
