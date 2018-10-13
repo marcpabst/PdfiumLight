@@ -8,6 +8,19 @@ namespace PdfiumLight
     public class PdfPageLink
     {
         /// <summary>
+        /// Creates a new instance of the PdfPageLink class.
+        /// </summary>
+        /// <param name="bounds">The location of the link</param>
+        /// <param name="targetPage">The target page of the link</param>
+        /// <param name="uri">The target URI of the link</param>
+        public PdfPageLink(RectangleF bounds, int? targetPage, string uri)
+        {
+            Bounds = bounds;
+            TargetPage = targetPage;
+            Uri = uri;
+        }
+
+        /// <summary>
         /// The location of the link.
         /// </summary>
         public RectangleF Bounds { get; private set; }
@@ -21,18 +34,5 @@ namespace PdfiumLight
         /// The target URI of the link.
         /// </summary>
         public string Uri { get; private set; }
-
-        /// <summary>
-        /// Creates a new instance of the PdfPageLink class.
-        /// </summary>
-        /// <param name="bounds">The location of the link</param>
-        /// <param name="targetPage">The target page of the link</param>
-        /// <param name="uri">The target URI of the link</param>
-        public PdfPageLink(RectangleF bounds, int? targetPage, string uri)
-        {
-            Bounds = bounds;
-            TargetPage = targetPage;
-            Uri = uri;
-        }
     }
 }
