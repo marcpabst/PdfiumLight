@@ -7,7 +7,7 @@ namespace PdfiumLight
     {
         public static byte[] ToByteArray(Stream stream)
         {
-            if (stream == null)
+            if (stream is null)
                 throw new ArgumentNullException(nameof(stream));
 
             if (stream is MemoryStream memoryStream)
@@ -24,6 +24,7 @@ namespace PdfiumLight
         private static byte[] ReadBytesFast(Stream stream)
         {
             byte[] data = new byte[stream.Length];
+
             int offset = 0;
 
             while (offset < data.Length)
@@ -54,10 +55,10 @@ namespace PdfiumLight
 
         public static void CopyStream(Stream from, Stream to)
         {
-            if (@from == null)
+            if (@from is null)
                 throw new ArgumentNullException(nameof(from));
 
-            if (to == null)
+            if (to is null)
                 throw new ArgumentNullException(nameof(to));
 
             var buffer = new byte[4096];

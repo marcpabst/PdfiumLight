@@ -12,7 +12,7 @@ namespace PdfiumLight
 
         public static int Register(Stream stream)
         {
-            if (stream == null)
+            if (stream is null)
                 throw new ArgumentNullException(nameof(stream));
 
             lock (_syncRoot)
@@ -35,8 +35,7 @@ namespace PdfiumLight
         {
             lock (_syncRoot)
             {
-                Stream stream;
-                _files.TryGetValue(id, out stream);
+                _files.TryGetValue(id, out Stream stream);
                 return stream;
             }
         }

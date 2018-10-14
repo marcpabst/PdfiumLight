@@ -100,7 +100,9 @@ namespace PdfiumLight
         private bool RenderPDFPageToDC(IntPtr dc, int dpiX, int dpiY, int boundsOriginX, int boundsOriginY, int boundsWidth, int boundsHeight, NativeMethods.FPDF flags)
         {
             if (_disposed)
-                throw new ObjectDisposedException(GetType().Name);
+            {
+                throw new ObjectDisposedException(nameof(PdfPage));
+            }
 
             NativeMethods.FPDF_RenderPage(dc, Page, boundsOriginX, boundsOriginY, boundsWidth, boundsHeight, 0, flags);
 
@@ -132,7 +134,9 @@ namespace PdfiumLight
         public Image Render(int width, int height, int clipX, int clipY, int clipWidth, int clipHeight, float dpiX, float dpiY, PdfRotation rotate, PdfRenderFlags flags)
         {
             if (_disposed)
-                throw new ObjectDisposedException(GetType().Name);
+            {
+                throw new ObjectDisposedException(nameof(PdfPage));
+            }
 
             if (height == 0 && width != 0)
             {
@@ -291,7 +295,9 @@ namespace PdfiumLight
         private bool RenderPDFPageToBitmap(IntPtr bitmapHandle, int dpiX, int dpiY, int boundsOriginX, int boundsOriginY, int boundsWidth, int boundsHeight, int rotate, NativeMethods.FPDF flags, bool renderFormFill)
         {
             if (_disposed)
-                throw new ObjectDisposedException(GetType().Name);
+            {
+                throw new ObjectDisposedException(nameof(PdfPage));
+            }
 
             if (renderFormFill)
                 flags &= ~NativeMethods.FPDF.ANNOT;
@@ -423,11 +429,11 @@ namespace PdfiumLight
         /// <param name="startIndex">The start index of the text</param>
         /// <param name="length">The length of the text</param>
         /// <returns>List of the bounds for the text</returns>
-        public IList<PdfRectangle> GetTextBounds(int startIndex, int length)
+        public PdfRectangle[] GetTextBounds(int startIndex, int length)
         {
-            var result = new List<PdfRectangle>();
-
             int countRects = NativeMethods.FPDFText_CountRects(TextPage, startIndex, length);
+
+            var result = new PdfRectangle[countRects];
 
             for (int i = 0; i < countRects; i++)
             {
@@ -442,7 +448,7 @@ namespace PdfiumLight
                 if (bounds.Width == 0 || bounds.Height == 0)
                     continue;
 
-                result.Add(new PdfRectangle(PageNumber, bounds));
+                result[i] = new PdfRectangle(PageNumber, bounds);
             }
 
             return result;

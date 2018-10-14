@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Drawing;
 
-#pragma warning disable 1591
-
 namespace PdfiumLight
 {
     public readonly struct PdfRectangle : IEquatable<PdfRectangle>
     {
+        // _page is offset by 1 so that Empty returns an invalid rectangle.
+        private readonly int _page;
+
         public static readonly PdfRectangle Empty = new PdfRectangle();
 
         public PdfRectangle(int page, RectangleF bounds)
@@ -21,16 +22,11 @@ namespace PdfiumLight
             Bounds = bounds;
         }
 
-
-        // _page is offset by 1 so that Empty returns an invalid rectangle.
-        private readonly int _page;
-
         public int Page => _page - 1;
 
         public RectangleF Bounds { get; }
 
         public bool IsValid => _page != 0;
-
 
         public bool Equals(PdfRectangle other)
         {
