@@ -459,7 +459,7 @@ namespace PdfiumLight
         /// Will also make sure to return a Rectangle with positive height and width.
         /// </summary>
         /// <param name="rect">The rect in PDF coordinates</param>
-        /// <param name="renderWidth">Render with of the page</param>
+        /// <param name="renderWidth">Render width of the page</param>
         /// <param name="renderHeight">Render height of the page</param>
         /// <returns>The transformed Rectangle</returns>
         public Rectangle RectangleFromPdf(RectangleF rect, int renderWidth, int renderHeight)
@@ -502,6 +502,62 @@ namespace PdfiumLight
         private NativeMethods.FPDF FlagsToFPDFFlags(PdfRenderFlags flags)
         {
             return (NativeMethods.FPDF)(flags & ~(PdfRenderFlags.Transparent | PdfRenderFlags.CorrectFromDpi));
+        }
+
+
+        /// <summary>
+        /// Extract unicode text within a rectangular boundary on the page,
+        /// rectangle defined by device coordinates: left, top, right, bottom.
+        /// </summary>
+        /// <param name="left">X device coordinate of the rectangle</param>
+        /// <param name="top">Y device coordinate of the rectangle</param>
+        /// <param name="right">X2 device coordinate of the rectangle</param>
+        /// <param name="bottom">Y2 device coordinate of the rectangle</param>
+        /// <param name="renderWidth">Render width of the page</param>
+        /// <param name="renderHeight">Render height of the page</param>
+        /// <returns>unicode text in the described rectangle</returns>
+        public string GetBoundedText(int left,int top,int right,int bottom, int renderWidth, int renderHeight)
+        {
+
+            //double deviceX1, deviceY1, deviceX2, deviceY2 = 0;
+            NativeMethods.FPDF_DeviceToPage(
+                Page,
+                0,
+                0,
+                renderWidth,
+                renderHeight,
+                0,
+                left,
+                top,
+                out double deviceX1,
+                out double deviceY1
+            );
+
+            NativeMethods.FPDF_DeviceToPage(
+                Page,
+                0,
+                0,
+                renderWidth,
+                renderHeight,
+                0,
+                right,
+                bottom,
+                out double deviceX2,
+                out double deviceY2
+            );
+
+            uint number_of_characters_not_bytes_needed = NativeMethods.FPDFText_GetBoundedText(TextPage,deviceX1,deviceY1,deviceX2,deviceY2, null, 0);
+
+            uint length = ( number_of_characters_not_bytes_needed + 1) * 2;
+            if (length <= 2)
+            {
+                return string.Empty;
+            }
+            
+            byte[] buffer = new byte[length];
+            NativeMethods.FPDFText_GetBoundedText(TextPage, deviceX1, deviceY1, deviceX2, deviceY2, buffer, length);
+
+            return Encoding.Unicode.GetString(buffer, 0, (int)(length - 2));
         }
     }
 }

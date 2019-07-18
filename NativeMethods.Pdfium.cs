@@ -599,6 +599,25 @@ namespace PdfiumLight
         }
 
 
+        // Parameters:
+        //			text_page	-	Handle to a text page information structure. 
+        //			left		-	Left boundary.
+        //			top		-	Top boundary.
+        //			right		-	Right boundary.
+        //			bottom		-	Bottom boundary.
+        //			buffer		-	A unicode buffer.
+        //			buflen		-	Number of characters (not bytes) for the buffer, excluding an additional terminator.
+        // Return Value:
+        //			If buffer is NULL or buflen is zero, return number of characters (not bytes) needed,
+        //			otherwise, return number of characters copied into the buffer.
+        public static uint FPDFText_GetBoundedText(IntPtr text_page, double left, double top, double right, double bottom, byte[] buffer, uint buflen)
+        {
+            lock (LockString)
+            {
+                return Imports.FPDFText_GetBoundedText(text_page, left, top, right, bottom, buffer, buflen);
+            }
+        }
+
 
         public static void FPDF_FFLDraw(IntPtr form, IntPtr bitmap, IntPtr page, int start_x, int start_y, int size_x, int size_y, int rotate, FPDF flags)
         {
@@ -754,6 +773,9 @@ namespace PdfiumLight
 
             [DllImport("pdfium.dll")]
             public static extern void FPDFText_GetRect(IntPtr text_page, int rect_index, out double left, out double top, out double right, out double bottom);
+
+            [DllImport("pdfium.dll")]
+            public static extern uint FPDFText_GetBoundedText(IntPtr text_page, double left, double top, double right, double bottom, byte[] buffer, uint buflen);
 
             [DllImport("pdfium.dll")]
             public static extern int FPDFText_CountRects(IntPtr text_page, int start_index, int count);
